@@ -250,7 +250,7 @@ export default function App() {
   const outputContextRef = useRef<AudioContext | null>(null);
   const nextStartTimeRef = useRef(0);
 
-  const activeOrder = useMemo(() => orders.find(o => o.status !== OrderStatus.COMPLETED), [orders]);
+  const activeOrder = useMemo(() => orders.find(o => (o.status === OrderStatus.PENDING || o.status === OrderStatus.PREPARING)), [orders]);
   const isLocked = !!activeOrder && !isAdmin;
 
   useEffect(() => {
@@ -296,21 +296,20 @@ export default function App() {
   }, []);
 
   const navigateTo = useCallback((view: View) => {
-    // Admin checks
-    if (view === View.ADMIN && !isAdmin) {
-       setCurrentView(View.ADMIN);
-       return;
-    }
-    // Lock logic: only allow Checkout or History when locked
-    if (isLocked && view !== View.CHECKOUT && view !== View.HISTORY) {
-      triggerTooltip("Navigation Locked: Order in Progress.");
+    // Enhanced lock logic: restrict all views except admin login when locked and not admin
+    if (isLocked && !isAdmin && view !== View.ADMIN) {
+      triggerTooltip("Access Restricted: Order in Progress. Admin access only.");
+      // Force redirect to a waiting screen or show login prompt
+      if (currentView !== View.HOME) {
+        setCurrentView(View.HOME);
+      }
       return;
     }
     setCurrentView(view);
     setIsCartOpen(false);
     setIsSecondaryOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [isLocked, isAdmin, triggerTooltip]);
+  }, [isLocked, isAdmin, triggerTooltip, currentView]);
 
   const toggleMute = () => {
     if (!audioRef.current) {
