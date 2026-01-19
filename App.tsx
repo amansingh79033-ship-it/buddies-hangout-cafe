@@ -245,6 +245,7 @@ export default function App() {
 
   const [isVoiceActive, setIsVoiceActive] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [timers, setTimers] = useState<{[orderId: string]: ReturnType<typeof setTimeout>}>({});
   const sessionRef = useRef<any>(null);
   const inputContextRef = useRef<AudioContext | null>(null);
   const outputContextRef = useRef<AudioContext | null>(null);
@@ -282,6 +283,13 @@ export default function App() {
     window.addEventListener('storage', handleStorageSync);
     return () => window.removeEventListener('storage', handleStorageSync);
   }, []);
+  
+  // Cleanup timers when component unmounts
+  useEffect(() => {
+    return () => {
+      Object.values(timers).forEach(timer => clearTimeout(timer));
+    };
+  }, [timers]);
 
   useEffect(() => {
     const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
@@ -606,6 +614,8 @@ export default function App() {
           settings={settings} 
           setSettings={setSettings} 
           onLogout={() => setIsAdmin(false)} 
+          timers={timers}
+          setTimers={setTimers}
         />
       ) : (
         <AdminLogin password={settings.password} onLogin={() => setIsAdmin(true)} />
@@ -926,7 +936,7 @@ function AdminLogin({ password, onLogin }: any) {
   );
 }
 
-function AdminDashboard({ orders, setOrders, menu, setMenu, events, setEvents, registrations, settings, setSettings, onLogout }: any) {
+function AdminDashboard({ orders, setOrders, menu, setMenu, events, setEvents, registrations, settings, setSettings, onLogout, timers, setTimers }: any) {
   const [tab, setTab] = useState<'orders'|'menu'|'events'|'settings'|'attendance'>('orders');
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
@@ -951,7 +961,48 @@ function AdminDashboard({ orders, setOrders, menu, setMenu, events, setEvents, r
                 </div>
                 <div className="flex gap-2 flex-wrap justify-center">
                   {Object.values(OrderStatus).map(s => (
-                    <button key={s} onClick={() => setOrders(orders.map((x:any) => x.id === o.id ? {...x, status: s} : x))} className={`px-4 py-2 rounded-xl text-[9px] font-syncopate font-black uppercase transition-all ${o.status === s ? 'bg-red-600' : 'bg-white/5 opacity-40 hover:opacity-100'}`}>{s}</button>
+                    <button key={s} onClick={() => {
+                      // Clear any existing timer for this order
+                      if (timers[o.id]) {
+                        clearTimeout(timers[o.id]);
+                        const newTimers = {...timers};
+                        delete newTimers[o.id];
+                        setTimers(newTimers);
+                      }
+                      
+                      // Update order status
+                      const updatedOrders = orders.map((x: any) => x.id === o.id ? {...x, status: s} : x);
+                      setOrders(updatedOrders);
+                      
+                      // Set timer if status is changed to PREPARING
+                      if (s === OrderStatus.PREPARING) {
+                        const timer = setTimeout(() => {
+                          // Change status to READY after 2 minutes (120000 ms) as an example
+                          setOrders(prev => prev.map(order => 
+                            order.id === o.id ? {...order, status: OrderStatus.READY} : order
+                          ));
+                          
+                          // Set another timer to change to COMPLETED after a delay
+                          const readyTimer = setTimeout(() => {
+                            setOrders(prev => prev.map(order => 
+                              order.id === o.id ? {...order, status: OrderStatus.COMPLETED} : order
+                            ));
+                            
+                            // Clean up timers
+                            setTimers(prev => {
+                              const newTimers = {...prev};
+                              delete newTimers[o.id];
+                              delete newTimers[`${o.id}_ready`];
+                              return newTimers;
+                            });
+                          }, 120000); // 2 minutes in READY state
+                          
+                          setTimers(prev => ({...prev, [`${o.id}_ready`]: readyTimer}));
+                        }, 120000); // 2 minutes in PREPARING state
+                        
+                        setTimers(prev => ({...prev, [o.id]: timer}));
+                      }
+                    }} className={`px-4 py-2 rounded-xl text-[9px] font-syncopate font-black uppercase transition-all ${o.status === s ? 'bg-red-600' : 'bg-white/5 opacity-40 hover:opacity-100'}`}>{s}</button>
                   ))}
                 </div>
               </div>
