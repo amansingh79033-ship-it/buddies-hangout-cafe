@@ -516,7 +516,14 @@ export default function App() {
   };
 
   const renderView = () => {
-    // Show admin-only access view when locked and not admin
+    // Show admin login screen when navigating to admin view while locked and not admin
+    if (isLocked && !isAdmin && currentView === View.ADMIN) {
+      return (
+        <AdminLogin password={settings.password} onLogin={() => setIsAdmin(true)} />
+      );
+    }
+    
+    // Show admin-only access view when locked and not admin (and not on admin view)
     if (isLocked && !isAdmin) {
       return (
         <div className="flex flex-col items-center justify-center min-h-[70vh] gap-10 p-4">
