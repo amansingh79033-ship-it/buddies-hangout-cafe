@@ -516,7 +516,32 @@ export default function App() {
   };
 
   const renderView = () => {
-    if (isLocked) {
+    // Show admin-only access view when locked and not admin
+    if (isLocked && !isAdmin) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[70vh] gap-10 p-4">
+          <div className="text-center max-w-md space-y-6">
+            <div className="w-24 h-24 bg-red-600/10 rounded-full flex items-center justify-center mx-auto animate-pulse">
+              <Lock className="w-12 h-12 text-red-500" />
+            </div>
+            <h2 className="text-3xl font-syncopate font-black uppercase tracking-tighter text-red-500">ACCESS RESTRICTED</h2>
+            <p className="text-gray-400 font-light">An order is currently in progress. Only admin access is permitted.</p>
+            
+            <div className="pt-6">
+              <button 
+                onClick={() => navigateTo(View.ADMIN)} 
+                className="py-4 px-8 bg-red-600 hover:bg-red-700 rounded-full font-syncopate font-black uppercase text-[10px] transition-all"
+              >
+                Admin Login
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // Show waiting room for admin users when locked
+    if (isLocked && isAdmin) {
       return (
         <div className="flex flex-col gap-10">
           <WaitingReadingRoom order={activeOrder!} books={INITIAL_BOOKS} />
