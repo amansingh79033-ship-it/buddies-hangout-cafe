@@ -1,0 +1,7 @@
+{
+  "name": "Buddies Hangout Cafe",
+  "description": "A refined immersive cafe experience featuring live music and premium dining.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
