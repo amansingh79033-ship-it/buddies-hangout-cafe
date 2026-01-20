@@ -251,7 +251,7 @@ export default function App() {
   const outputContextRef = useRef<AudioContext | null>(null);
   const nextStartTimeRef = useRef(0);
 
-  const activeOrder = useMemo(() => orders.find(o => (o.status === OrderStatus.PENDING || o.status === OrderStatus.PREPARING)), [orders]);
+  const activeOrder = useMemo(() => orders.find(o => o.status === OrderStatus.PENDING), [orders]);
   const isLocked = !!activeOrder && !isAdmin;
 
   useEffect(() => {
@@ -611,6 +611,7 @@ export default function App() {
           events={events}
           setEvents={setEvents}
           registrations={registrations}
+          setRegistrations={setRegistrations}
           settings={settings} 
           setSettings={setSettings} 
           onLogout={() => setIsAdmin(false)} 
@@ -936,7 +937,7 @@ function AdminLogin({ password, onLogin }: any) {
   );
 }
 
-function AdminDashboard({ orders, setOrders, menu, setMenu, events, setEvents, registrations, settings, setSettings, onLogout, timers, setTimers }: any) {
+function AdminDashboard({ orders, setOrders, menu, setMenu, events, setEvents, registrations, setRegistrations, settings, setSettings, onLogout, timers, setTimers }: any) {
   const [tab, setTab] = useState<'orders'|'menu'|'events'|'settings'|'attendance'>('orders');
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
@@ -1019,6 +1020,126 @@ function AdminDashboard({ orders, setOrders, menu, setMenu, events, setEvents, r
           ))}
         </div>
       )}
+      {tab === 'menu' && (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h3 className="text-2xl font-syncopate font-black uppercase text-red-500">MENU MANAGEMENT</h3>
+            <button 
+              onClick={() => {
+                const newItem: MenuItem = {
+                  id: `item-${Date.now()}`,
+                  name: 'New Item',
+                  price: '₹100',
+                  category: 'Snacks',
+                  image: 'https://placehold.co/300x300?text=New+Item',
+                  available: true,
+                  isSpecial: false
+                };
+                setMenu([...menu, newItem]);
+                setEditingItem(newItem);
+              }}
+              className="px-4 py-2 bg-red-600 rounded-xl text-[10px] font-syncopate font-black uppercase"
+            >
+              ADD ITEM
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {menu.map((item: MenuItem) => (
+              <div key={item.id} className="glass p-6 rounded-[2.5rem] border-white/5 space-y-4">
+                <div className="aspect-square rounded-2xl overflow-hidden">
+                  <img src={item.image} className="w-full h-full object-cover" alt={item.name} />
+                </div>
+                {editingItem?.id === item.id ? (
+                  <div className="space-y-3">
+                    <input 
+                      type="text" 
+                      value={editingItem.name}
+                      onChange={(e) => setEditingItem({...editingItem, name: e.target.value})}
+                      className="w-full bg-white/5 border border-white/10 p-2 rounded-xl text-sm focus:outline-none focus:border-red-500"
+                      placeholder="Item Name"
+                    />
+                    <input 
+                      type="text" 
+                      value={editingItem.price}
+                      onChange={(e) => setEditingItem({...editingItem, price: e.target.value})}
+                      className="w-full bg-white/5 border border-white/10 p-2 rounded-xl text-sm focus:outline-none focus:border-red-500"
+                      placeholder="Price"
+                    />
+                    <select 
+                      value={editingItem.category}
+                      onChange={(e) => setEditingItem({...editingItem, category: e.target.value as any})}
+                      className="w-full bg-white/5 border border-white/10 p-2 rounded-xl text-sm focus:outline-none focus:border-red-500"
+                    >
+                      <option value="Snacks">Snacks</option>
+                      <option value="Beverages">Beverages</option>
+                      <option value="Desserts">Desserts</option>
+                    </select>
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="checkbox" 
+                        id={`available-${item.id}`}
+                        checked={editingItem.available}
+                        onChange={(e) => setEditingItem({...editingItem, available: e.target.checked})}
+                        className="rounded"
+                      />
+                      <label htmlFor={`available-${item.id}`} className="text-sm">Available</label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="checkbox" 
+                        id={`special-${item.id}`}
+                        checked={editingItem.isSpecial}
+                        onChange={(e) => setEditingItem({...editingItem, isSpecial: e.target.checked})}
+                        className="rounded"
+                      />
+                      <label htmlFor={`special-${item.id}`} className="text-sm">Special</label>
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <button 
+                        onClick={() => {
+                          setMenu(menu.map(m => m.id === editingItem.id ? editingItem : m));
+                          setEditingItem(null);
+                        }}
+                        className="flex-1 py-2 bg-green-600 rounded-xl text-[9px] font-syncopate font-black uppercase"
+                      >
+                        SAVE
+                      </button>
+                      <button 
+                        onClick={() => setEditingItem(null)}
+                        className="flex-1 py-2 bg-gray-600 rounded-xl text-[9px] font-syncopate font-black uppercase"
+                      >
+                        CANCEL
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <h4 className="font-bold uppercase">{item.name}</h4>
+                    <p className="text-red-500 font-syncopate font-black">{item.price}</p>
+                    <p className="text-[10px] uppercase opacity-60">{item.category}</p>
+                    <div className="flex gap-2 pt-2">
+                      <button 
+                        onClick={() => setEditingItem(item)}
+                        className="flex-1 py-2 bg-white/10 rounded-xl text-[9px] font-syncopate font-black uppercase hover:bg-white/20 transition-all"
+                      >
+                        EDIT
+                      </button>
+                      <button 
+                        onClick={() => setMenu(menu.filter(m => m.id !== item.id))}
+                        className="flex-1 py-2 bg-red-600/20 text-red-500 rounded-xl text-[9px] font-syncopate font-black uppercase hover:bg-red-600 hover:text-white transition-all"
+                      >
+                        DELETE
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
       {tab === 'settings' && (
         <div className="max-w-md mx-auto space-y-8 glass p-10 rounded-[3rem] border-red-500/10">
           <div className="space-y-4">
@@ -1037,7 +1158,97 @@ function AdminDashboard({ orders, setOrders, menu, setMenu, events, setEvents, r
           </div>
         </div>
       )}
-      {/* Existing menu/events tab implementations kept functional from previous turns */}
+      {tab === 'events' && (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h3 className="text-2xl font-syncopate font-black uppercase text-red-500">EVENTS MANAGEMENT</h3>
+            <button 
+              onClick={() => {
+                const newEvent: CafeEvent = {
+                  id: `event-${Date.now()}`,
+                  title: 'New Event',
+                  date: new Date().toISOString().split('T')[0],
+                  description: 'Event description',
+                  price: 'Free'
+                };
+                setEvents([...events, newEvent]);
+              }}
+              className="px-4 py-2 bg-red-600 rounded-xl text-[10px] font-syncopate font-black uppercase"
+            >
+              ADD EVENT
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {events.map((event: CafeEvent) => (
+              <div key={event.id} className="glass p-6 rounded-[2.5rem] border-white/5 space-y-4">
+                <input 
+                  type="text" 
+                  value={event.title}
+                  onChange={(e) => setEvents(events.map(ev => ev.id === event.id ? {...ev, title: e.target.value} : ev))}
+                  className="w-full bg-white/5 border border-white/10 p-3 rounded-xl focus:outline-none focus:border-red-500"
+                  placeholder="Event Title"
+                />
+                <input 
+                  type="date" 
+                  value={event.date}
+                  onChange={(e) => setEvents(events.map(ev => ev.id === event.id ? {...ev, date: e.target.value} : ev))}
+                  className="w-full bg-white/5 border border-white/10 p-3 rounded-xl focus:outline-none focus:border-red-500"
+                />
+                <textarea 
+                  value={event.description}
+                  onChange={(e) => setEvents(events.map(ev => ev.id === event.id ? {...ev, description: e.target.value} : ev))}
+                  className="w-full bg-white/5 border border-white/10 p-3 rounded-xl focus:outline-none focus:border-red-500 min-h-[100px]"
+                  placeholder="Event Description"
+                />
+                <input 
+                  type="text" 
+                  value={event.price || ''}
+                  onChange={(e) => setEvents(events.map(ev => ev.id === event.id ? {...ev, price: e.target.value} : ev))}
+                  className="w-full bg-white/5 border border-white/10 p-3 rounded-xl focus:outline-none focus:border-red-500"
+                  placeholder="Price (optional)"
+                />
+                <button 
+                  onClick={() => setEvents(events.filter(ev => ev.id !== event.id))}
+                  className="w-full py-3 bg-red-600/20 text-red-500 rounded-xl text-[10px] font-syncopate font-black uppercase hover:bg-red-600 hover:text-white transition-all"
+                >
+                  DELETE EVENT
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {tab === 'attendance' && (
+        <div className="space-y-6">
+          <h3 className="text-2xl font-syncopate font-black uppercase text-red-500">ATTENDANCE RECORDS</h3>
+          
+          <div className="space-y-4">
+            {registrations.length === 0 ? (
+              <p className="text-center opacity-60 py-10">No attendance records found.</p>
+            ) : (
+              registrations.map((reg: EventRegistration) => (
+                <div key={reg.id} className="glass p-6 rounded-[2.5rem] border-white/5 flex justify-between items-center">
+                  <div>
+                    <h4 className="font-bold uppercase">{reg.eventName}</h4>
+                    <p className="text-[10px] opacity-60">Registration ID: {reg.id}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-syncopate font-black uppercase opacity-60">{reg.timestamp}</p>
+                    <button 
+                      onClick={() => setRegistrations(registrations.filter(r => r.id !== reg.id))}
+                      className="mt-2 px-3 py-1 bg-red-600/20 text-red-500 rounded-lg text-[8px] font-syncopate font-black uppercase hover:bg-red-600 hover:text-white transition-all"
+                    >
+                      REMOVE
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
