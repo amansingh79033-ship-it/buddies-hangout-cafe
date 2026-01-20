@@ -47,8 +47,32 @@
         }
 
         /* Lenis smooth scroll adjustments */
-        html.lenis { height: auto; }
-        .lenis.lenis-smooth { scroll-behavior: auto !important; }
+        html.lenis, html.lenis body { 
+            height: auto; 
+            overflow: hidden; 
+        }
+        .lenis.lenis-smooth {
+            scroll-behavior: auto !important;
+        }
+        .lenis.lenis-smooth [data-lenis-prevent] {
+            overscroll-behavior: contain;
+        }
+        
+        /* Global smooth scroll styles */
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Ensure all scrollable containers work with Lenis */
+        .overlay-container,
+        .custom-scrollbar {
+            overscroll-behavior: contain;
+        }
         
         /* Micro animations */
         .hover-lift { transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -76,6 +100,32 @@
           50% { box-shadow: 0 0 20px 10px rgba(239, 68, 68, 0); }
         }
         .pulse-red { animation: pulse-red 2s infinite; }
+        
+        /* Scroll-based animations */
+        .scroll-fade {
+          opacity: 0.3;
+          transform: translateY(50px);
+          transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        
+        .scroll-scale {
+          transform: scale(0.8);
+          transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        
+        .parallax-element {
+          transition: transform 0.1s linear;
+        }
+        
+        /* Enhanced section transitions */
+        section {
+          opacity: 0.7;
+          transition: opacity 0.8s ease-out;
+        }
+        
+        section.visible {
+          opacity: 1;
+        }
     </style>
 <link rel="stylesheet" href="/index.css">
 </head>

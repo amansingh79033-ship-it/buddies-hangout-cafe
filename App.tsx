@@ -46,7 +46,8 @@ import {
   ArrowRight,
   Download,
   Minus,
-  FileText
+  FileText,
+  MapPin
 } from 'lucide-react';
 import { View, MenuItem, Order, OrderStatus, AdminSettings, PromoCode, CafeEvent, EventRegistration, Book, CartItem } from './types';
 import { INITIAL_MENU, SPONSOR_LOGO, INITIAL_BOOKS } from './constants';
@@ -125,23 +126,193 @@ const ThreeBackground = ({ color }: { color: string }) => {
     iconsGroupRef.current = iconsGroup;
     scene.add(iconsGroup);
 
+    // Food-themed snack and fruit geometries
+    const createBurgerGeometry = () => {
+      const group = new THREE.Group();
+      
+      // Bottom bun
+      const bottomBun = new THREE.SphereGeometry(0.3, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+      const bottomBunMesh = new THREE.Mesh(bottomBun, new THREE.MeshBasicMaterial({ color: '#e6bc5c' }));
+      bottomBunMesh.position.y = -0.15;
+      group.add(bottomBunMesh);
+      
+      // Patty
+      const patty = new THREE.CylinderGeometry(0.25, 0.25, 0.1, 16);
+      const pattyMesh = new THREE.Mesh(patty, new THREE.MeshBasicMaterial({ color: '#5d2c18' }));
+      group.add(pattyMesh);
+      
+      // Top bun
+      const topBun = new THREE.SphereGeometry(0.3, 16, 16, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+      const topBunMesh = new THREE.Mesh(topBun, new THREE.MeshBasicMaterial({ color: '#e6bc5c' }));
+      topBunMesh.position.y = 0.15;
+      group.add(topBunMesh);
+      
+      return group;
+    };
+
+    const createPizzaSliceGeometry = () => {
+      const group = new THREE.Group();
+      
+      // Base
+      const base = new THREE.CylinderGeometry(0.3, 0.3, 0.05, 16);
+      const baseMesh = new THREE.Mesh(base, new THREE.MeshBasicMaterial({ color: '#e6bc5c' }));
+      group.add(baseMesh);
+      
+      // Pepperoni
+      for (let i = 0; i < 5; i++) {
+        const pepperoni = new THREE.CylinderGeometry(0.05, 0.05, 0.02, 8);
+        const pepperoniMesh = new THREE.Mesh(pepperoni, new THREE.MeshBasicMaterial({ color: '#d62828' }));
+        pepperoniMesh.position.set(
+          (Math.random() - 0.5) * 0.4,
+          0.03,
+          (Math.random() - 0.5) * 0.4
+        );
+        group.add(pepperoniMesh);
+      }
+      
+      return group;
+    };
+
+    const createAppleGeometry = () => {
+      const group = new THREE.Group();
+      
+      // Apple body
+      const appleBody = new THREE.SphereGeometry(0.25, 16, 16);
+      const appleMesh = new THREE.Mesh(appleBody, new THREE.MeshBasicMaterial({ color: '#ff6b6b' }));
+      group.add(appleMesh);
+      
+      // Stem
+      const stem = new THREE.CylinderGeometry(0.02, 0.02, 0.1, 8);
+      const stemMesh = new THREE.Mesh(stem, new THREE.MeshBasicMaterial({ color: '#8b4513' }));
+      stemMesh.position.y = 0.3;
+      group.add(stemMesh);
+      
+      return group;
+    };
+
+    const createBananaGeometry = () => {
+      const group = new THREE.Group();
+      
+      const curve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-0.2, 0, 0),
+        new THREE.Vector3(0, 0.1, 0),
+        new THREE.Vector3(0.2, 0, 0)
+      ]);
+      
+      const bananaGeo = new THREE.TubeGeometry(curve, 16, 0.15, 8, false);
+      const bananaMesh = new THREE.Mesh(bananaGeo, new THREE.MeshBasicMaterial({ color: '#ffd700' }));
+      group.add(bananaMesh);
+      
+      return group;
+    };
+
+    const createCoffeeCupGeometry = () => {
+      const group = new THREE.Group();
+      
+      // Cup
+      const cup = new THREE.CylinderGeometry(0.2, 0.25, 0.3, 16);
+      const cupMesh = new THREE.Mesh(cup, new THREE.MeshBasicMaterial({ color: '#8b4513' }));
+      group.add(cupMesh);
+      
+      // Handle
+      const handleCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(0.3, 0.1, 0),
+        new THREE.Vector3(0.4, 0.15, 0),
+        new THREE.Vector3(0.3, 0.2, 0)
+      ]);
+      const handleGeo = new THREE.TubeGeometry(handleCurve, 8, 0.05, 8, false);
+      const handleMesh = new THREE.Mesh(handleGeo, new THREE.MeshBasicMaterial({ color: '#8b4513' }));
+      group.add(handleMesh);
+      
+      return group;
+    };
+
+    const createIceCreamGeometry = () => {
+      const group = new THREE.Group();
+      
+      // Cone
+      const cone = new THREE.ConeGeometry(0.2, 0.3, 16);
+      const coneMesh = new THREE.Mesh(cone, new THREE.MeshBasicMaterial({ color: '#d2691e' }));
+      coneMesh.rotation.x = Math.PI;
+      coneMesh.position.y = -0.15;
+      group.add(coneMesh);
+      
+      // Ice cream scoop
+      const scoop = new THREE.SphereGeometry(0.2, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+      const scoopMesh = new THREE.Mesh(scoop, new THREE.MeshBasicMaterial({ color: '#ff69b4' }));
+      scoopMesh.position.y = 0.1;
+      group.add(scoopMesh);
+      
+      return group;
+    };
+
     const iconGeos = [
-      new THREE.TorusGeometry(0.3, 0.1, 12, 48),
-      new THREE.SphereGeometry(0.3, 16, 16),
-      new THREE.BoxGeometry(0.4, 0.4, 0.4),
-      new THREE.IcosahedronGeometry(0.3, 0),
+      createBurgerGeometry(),
+      createPizzaSliceGeometry(),
+      createAppleGeometry(),
+      createBananaGeometry(),
+      createCoffeeCupGeometry(),
+      createIceCreamGeometry(),
+      new THREE.SphereGeometry(0.2, 16, 16), // Generic sphere for variety
+      new THREE.TorusGeometry(0.2, 0.05, 12, 24) // Donut shape
     ];
 
-    for (let i = 0; i < 40; i++) {
-      const geo = iconGeos[Math.floor(Math.random() * iconGeos.length)];
-      const mat = new THREE.MeshBasicMaterial({ color: color, wireframe: true, transparent: true, opacity: 0.3 });
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.set((Math.random() - 0.5) * 40, (Math.random() - 0.5) * 40, (Math.random() - 0.5) * 20);
-      mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+    for (let i = 0; i < 50; i++) {
+      const geoIndex = Math.floor(Math.random() * iconGeos.length);
+      const geo = iconGeos[geoIndex];
+      
+      // Clone geometry to avoid sharing between meshes
+      let mesh;
+      if (geo instanceof THREE.Group) {
+        // For groups, clone the entire group
+        mesh = geo.clone();
+        mesh.traverse(child => {
+          if (child instanceof THREE.Mesh) {
+            child.material = new THREE.MeshBasicMaterial({ 
+              color: color, 
+              wireframe: true, 
+              transparent: true, 
+              opacity: 0.3 
+            });
+          }
+        });
+      } else {
+        // For single geometries
+        const mat = new THREE.MeshBasicMaterial({ 
+          color: color, 
+          wireframe: true, 
+          transparent: true, 
+          opacity: 0.3 
+        });
+        mesh = new THREE.Mesh(geo.clone(), mat);
+      }
+      
+      mesh.position.set(
+        (Math.random() - 0.5) * 50, 
+        (Math.random() - 0.5) * 50, 
+        (Math.random() - 0.5) * 30
+      );
+      mesh.rotation.set(
+        Math.random() * Math.PI, 
+        Math.random() * Math.PI, 
+        Math.random() * Math.PI
+      );
+      
+      // Enhanced user data for more dynamic movement
       mesh.userData = { 
-        rotSpeed: (Math.random() - 0.5) * 0.02,
-        floatSpeed: (Math.random() - 0.5) * 0.005
+        rotSpeed: {
+          x: (Math.random() - 0.5) * 0.03,
+          y: (Math.random() - 0.5) * 0.03,
+          z: (Math.random() - 0.5) * 0.03
+        },
+        floatSpeed: (Math.random() - 0.5) * 0.008,
+        originalPosition: mesh.position.clone(),
+        bobOffset: Math.random() * Math.PI * 2,
+        // Cursor interaction properties
+        mouseInfluence: 0,
+        targetScale: 1
       };
+      
       iconsGroup.add(mesh);
     }
 
@@ -164,18 +335,74 @@ const ThreeBackground = ({ color }: { color: string }) => {
 
     const animate = () => {
       requestAnimationFrame(animate);
+      const time = Date.now() * 0.001;
+      
       knot.rotation.y += 0.0005; 
       knot.rotation.x += 0.0002;
       particles.rotation.y += 0.0002;
       
       iconsGroup.children.forEach(icon => {
-        icon.rotation.x += icon.userData.rotSpeed;
-        icon.rotation.y += icon.userData.rotSpeed;
-        icon.position.y += Math.sin(Date.now() * 0.001 + icon.position.x) * 0.005;
+        // Enhanced rotation with individual axis speeds
+        icon.rotation.x += icon.userData.rotSpeed.x;
+        icon.rotation.y += icon.userData.rotSpeed.y;
+        icon.rotation.z += icon.userData.rotSpeed.z;
+        
+        // Bobbing motion with individual offsets
+        const bobHeight = Math.sin(time * 0.5 + icon.userData.bobOffset) * 0.3;
+        icon.position.y = icon.userData.originalPosition.y + bobHeight;
+        
+        // Cursor interaction - calculate distance to mouse position
+        const screenPos = icon.position.clone().project(camera);
+        const mouseDistance = Math.sqrt(
+          Math.pow(screenPos.x - mouseX, 2) + 
+          Math.pow(screenPos.y - (-mouseY), 2)
+        );
+        
+        // Smooth influence based on proximity
+        const maxDistance = 0.8;
+        const influence = Math.max(0, 1 - (mouseDistance / maxDistance));
+        
+        // Apply mouse influence to scaling and movement
+        icon.userData.mouseInfluence += (influence - icon.userData.mouseInfluence) * 0.1;
+        icon.userData.targetScale = 1 + icon.userData.mouseInfluence * 0.5;
+        
+        // Scale animation
+        const currentScale = icon.scale.x;
+        const targetScale = icon.userData.targetScale;
+        icon.scale.setScalar(currentScale + (targetScale - currentScale) * 0.1);
+        
+        // Subtle position attraction toward cursor when close
+        if (icon.userData.mouseInfluence > 0.1) {
+          const attractionStrength = icon.userData.mouseInfluence * 0.002;
+          const worldMouseX = mouseX * 15;
+          const worldMouseY = -mouseY * 10;
+          
+          icon.position.x += (worldMouseX - icon.position.x) * attractionStrength;
+          icon.position.z += (0 - icon.position.z) * attractionStrength * 0.5;
+        }
+        
+        // Gentle color pulsing when interacting
+        if (icon instanceof THREE.Mesh) {
+          const pulseIntensity = icon.userData.mouseInfluence * 0.3;
+          ((icon.material as THREE.MeshBasicMaterial).color as THREE.Color).lerp(
+            new THREE.Color(color), 
+            1 - pulseIntensity
+          );
+        } else if (icon instanceof THREE.Group) {
+          icon.traverse(child => {
+            if (child instanceof THREE.Mesh) {
+              const pulseIntensity = icon.userData.mouseInfluence * 0.3;
+              ((child.material as THREE.MeshBasicMaterial).color as THREE.Color).lerp(
+                new THREE.Color(color), 
+                1 - pulseIntensity
+              );
+            }
+          });
+        }
       });
 
-      camera.position.x += (mouseX * 1 - camera.position.x) * 0.02;
-      camera.position.y += (-mouseY * 1 - camera.position.y) * 0.02;
+      camera.position.x += (mouseX * 1.5 - camera.position.x) * 0.02;
+      camera.position.y += (-mouseY * 1.5 - camera.position.y) * 0.02;
       camera.lookAt(scene.position);
       renderer.render(scene, camera);
     };
@@ -199,12 +426,54 @@ const ThreeBackground = ({ color }: { color: string }) => {
     if (particlesRef.current) (particlesRef.current.material as THREE.PointsMaterial).color.set(color);
     if (iconsGroupRef.current) {
       iconsGroupRef.current.children.forEach(icon => {
-        ((icon as THREE.Mesh).material as THREE.MeshBasicMaterial).color.set(color);
+        if (icon instanceof THREE.Mesh) {
+          ((icon.material as THREE.MeshBasicMaterial).color as THREE.Color).lerp(new THREE.Color(color), 0.1);
+        } else if (icon instanceof THREE.Group) {
+          icon.traverse(child => {
+            if (child instanceof THREE.Mesh) {
+              ((child.material as THREE.MeshBasicMaterial).color as THREE.Color).lerp(new THREE.Color(color), 0.1);
+            }
+          });
+        }
       });
     }
   }, [color]);
 
   return null;
+};
+
+// Lenis utility functions for global scroll control
+const scrollToTop = () => {
+  const lenis = (window as any).lenis;
+  if (lenis) {
+    lenis.scrollTo(0, { offset: 0, duration: 1.5, easing: (t: number) => 1 - Math.pow(1 - t, 3) });
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+};
+
+const scrollToElement = (selector: string, offset: number = 0) => {
+  const lenis = (window as any).lenis;
+  const element = document.querySelector(selector);
+  if (lenis && element) {
+    lenis.scrollTo(element, { offset, duration: 1.2 });
+  } else if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+};
+
+const stopScroll = () => {
+  const lenis = (window as any).lenis;
+  if (lenis) {
+    lenis.stop();
+  }
+};
+
+const startScroll = () => {
+  const lenis = (window as any).lenis;
+  if (lenis) {
+    lenis.start();
+  }
 };
 
 const Tooltip = ({ message }: { message: string }) => (
@@ -232,7 +501,7 @@ export default function App() {
   const [registrations, setRegistrations] = useState<EventRegistration[]>(() => getStored(STORAGE_KEYS.REGISTRATIONS, []));
   const [settings, setSettings] = useState<AdminSettings>(() => getStored(STORAGE_KEYS.SETTINGS, {
     password: 'admin890',
-    qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://buddiescafe.space/menu',
+    qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://buddycafehangout.vercel.app/menu',
     lastUpdated: new Date().toISOString(),
     promo: {
         code: 'WELCOME50',
@@ -291,11 +560,88 @@ export default function App() {
     };
   }, [timers]);
 
+  // Global Lenis smooth scroll setup with enhanced animations
   useEffect(() => {
-    const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
-    function raf(time: number) { lenis.raf(time); requestAnimationFrame(raf); }
+    // Function to update scroll-based animations
+    const updateScrollAnimations = (scrollValue: number) => {
+      // Parallax effect for background elements
+      const parallaxElements = document.querySelectorAll('.parallax-element');
+      parallaxElements.forEach(el => {
+        const speed = parseFloat(el.getAttribute('data-parallax-speed') || '0.5');
+        const yPos = -(scrollValue * speed);
+        (el as HTMLElement).style.transform = `translateY(${yPos}px)`;
+      });
+      
+      // Fade-in elements as they come into view
+      const fadeElements = document.querySelectorAll('.scroll-fade');
+      fadeElements.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
+        
+        if (isVisible) {
+          const scrollPercentage = Math.max(0, Math.min(1, 1 - (rect.top / window.innerHeight)));
+          (el as HTMLElement).style.opacity = Math.min(1, scrollPercentage * 2).toString();
+          (el as HTMLElement).style.transform = `translateY(${50 * (1 - scrollPercentage)}px)`;
+        }
+      });
+      
+      // Scale elements based on scroll position
+      const scaleElements = document.querySelectorAll('.scroll-scale');
+      scaleElements.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
+        
+        if (isVisible) {
+          const scrollPercentage = Math.max(0, Math.min(1, 1 - (rect.top / window.innerHeight)));
+          const scaleValue = 0.8 + (0.2 * scrollPercentage);
+          (el as HTMLElement).style.transform = `scale(${scaleValue})`;
+        }
+      });
+    };
+    
+    // Configure Lenis for global smooth scrolling with enhanced settings
+    const lenis = new Lenis({
+      duration: 1.5,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+    });
+
+    // Enhanced scroll event handler with animation effects
+    const handleScroll = (e: any) => {
+      // Update scroll position for animations
+      lenis.raf(Date.now());
+      
+      // Trigger scroll animations
+      updateScrollAnimations(lenis.scroll);
+    };
+
+    // Animation frame loop with scroll tracking
+    function raf(time: number) {
+      lenis.raf(time);
+      
+      // Update scroll animations based on scroll position
+      updateScrollAnimations(lenis.scroll);
+      
+      requestAnimationFrame(raf);
+    }
+    
     requestAnimationFrame(raf);
-    return () => lenis.destroy();
+
+    // Add global scroll listeners
+    document.addEventListener('wheel', handleScroll, { passive: false });
+    document.addEventListener('touchmove', handleScroll, { passive: false });
+    
+    // Store lenis instance globally for access from anywhere
+    (window as any).lenis = lenis;
+
+    return () => {
+      lenis.destroy();
+      document.removeEventListener('wheel', handleScroll);
+      document.removeEventListener('touchmove', handleScroll);
+      delete (window as any).lenis;
+    };
   }, []);
 
   const triggerTooltip = useCallback((msg: string) => {
@@ -479,7 +825,7 @@ export default function App() {
         config: {
           responseModalities: [Modality.AUDIO],
           tools: [{ functionDeclarations: [addToCartTool, navigateToViewTool, recommendItemsTool] }],
-          systemInstruction: `Buddies Cafe Concierge. Menu: ${menu.map(i => i.name).join(', ')}. Assist with cart quantities, advice, and navigation between Home, Menu, Story, History, and Checkout.`
+          systemInstruction: `Buddy's Hangout Cafe Concierge. Menu: ${menu.map(i => i.name).join(', ')}. Assist with cart quantities, advice, and navigation between Home, Menu, Story, History, and Checkout.`
         }
       });
       sessionRef.current = await sessionPromise;
@@ -499,7 +845,7 @@ export default function App() {
     printWindow.document.write(`
       <html>
         <head>
-          <title>BUDDIES CAFE INVOICE ${order.id}</title>
+          <title>BUDDY'S HANGOUT CAFE INVOICE ${order.id}</title>
           <style>
             body { font-family: 'Inter', sans-serif; padding: 40px; color: #333; }
             .header { border-bottom: 3px solid #ef4444; padding-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
@@ -509,7 +855,7 @@ export default function App() {
         </head>
         <body>
           <div class="header">
-            <div><h1 style="margin:0;font-family:Syncopate">BUDDIES CAFE</h1><p style="margin:5px 0 0 0">Order ${order.id}</p></div>
+            <div><h1 style="margin:0;font-family:Syncopate">BUDDY'S HANGOUT CAFE</h1><p style="margin:5px 0 0 0">Order ${order.id}</p></div>
             <div style="text-align:right"><p style="margin:0">TABLE ${order.tableNumber}</p><p style="margin:5px 0 0 0">${order.createdAt}</p></div>
           </div>
           <div style="margin-top:40px">${itemsHtml}</div>
@@ -630,14 +976,14 @@ export default function App() {
       <ThreeBackground color={vibe} />
       {tooltip && <Tooltip message={tooltip} />}
       
-      <nav className={`fixed top-0 left-0 right-0 z-[60] glass border-b border-red-500/20 px-4 sm:px-8 py-3.5 flex items-center justify-between transition-opacity ${isLocked ? 'opacity-40' : 'opacity-100'}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-[60] glass px-4 sm:px-8 py-3.5 flex items-center justify-between transition-opacity ${isLocked ? 'opacity-40' : 'opacity-100'} relative`}>
         <div className="flex items-center space-x-3 cursor-pointer group trigger-btn" onClick={() => navigateTo(View.HOME)}>
           <div className="relative p-2.5 bg-red-600 rounded-xl group-hover:rotate-12 transition-all shadow-[0_0_20px_rgba(239,68,68,0.3)]">
             <Utensils className="w-5 h-5 text-white" />
           </div>
           <div className="flex flex-col">
-            <span className="font-syncopate font-black text-lg tracking-tighter uppercase leading-none">BUDDIES</span>
-            <span className="text-[9px] font-syncopate uppercase tracking-widest text-red-500 font-bold">CAFE</span>
+            <span className="font-syncopate font-black text-lg tracking-tighter uppercase leading-none">BUDDY'S</span>
+            <span className="text-[9px] font-syncopate uppercase tracking-widest text-red-500 font-bold">HANGOUT CAFE</span>
           </div>
         </div>
 
@@ -659,6 +1005,13 @@ export default function App() {
           <button onClick={() => setIsSecondaryOpen(!isSecondaryOpen)} className="p-3 glass rounded-2xl border border-white/10 trigger-btn active:scale-95 transition-all">
             <Hamburger className="w-5 h-5" />
           </button>
+        </div>
+        
+        {/* Curved bottom edge similar to qoder.com */}
+        <div className="absolute bottom-0 left-0 right-0 h-4 overflow-hidden pointer-events-none">
+          <svg viewBox="0 0 100 10" preserveAspectRatio="none" className="w-full h-full">
+            <path d="M0,10 C25,5 75,5 100,10 L100,0 L0,0 Z" fill="var(--glass-bg, rgba(0,0,0,0.3))" />
+          </svg>
         </div>
       </nav>
 
@@ -699,8 +1052,16 @@ export default function App() {
         </div>
       </div>
 
-      <main className={`pt-28 pb-24 px-4 sm:px-8 relative z-10 max-w-7xl mx-auto min-h-screen transition-opacity duration-300 ${isSecondaryOpen || isCartOpen ? 'opacity-30 pointer-events-none blur-sm' : 'opacity-100'}`}>
+      <main className={`pt-24 pb-20 px-4 sm:px-8 relative z-10 max-w-7xl mx-auto min-h-screen transition-opacity duration-300 ${isSecondaryOpen || isCartOpen ? 'opacity-30 pointer-events-none blur-sm' : 'opacity-100'}`}>
         {renderView()}
+        {/* Timer Modal for orders with estimated time */}
+        {activeOrder && activeOrder.estimatedTime && (
+          <TimerModal 
+            order={activeOrder} 
+            isVisible={!!activeOrder.estimatedTime} 
+            onClose={() => {}} // No close button since it's tied to active order
+          />
+        )}
       </main>
 
       <footer className="fixed bottom-0 left-0 right-0 z-50 py-5 px-8 flex flex-col sm:flex-row justify-between items-center bg-gradient-to-t from-black to-transparent pointer-events-none gap-4">
@@ -764,14 +1125,14 @@ function HomeView({ setView, promo, menu, events, onRegister, onAdd, onTriggerTo
   const visitors = useMemo(() => Math.floor(Math.random() * 20 + 30), []);
   const specials = useMemo(() => menu.filter((i: MenuItem) => i.isSpecial && i.available), [menu]);
   return (
-    <div className="space-y-20 animate-in fade-in duration-1000">
-      <div className="flex flex-col items-center justify-center py-10 sm:py-20 text-center space-y-10">
+    <div className="space-y-20 animate-in fade-in duration-1000 scroll-fade" data-scroll-fade="true">
+      <div className="flex flex-col items-center justify-center py-6 sm:py-12 text-center space-y-8 scroll-fade" data-scroll-fade="true">
         {promo.isActive && <div className="w-full max-w-2xl py-3 px-6 bg-red-600 rounded-full flex items-center justify-center gap-3 animate-bounce shadow-[0_0_40px_rgba(239,68,68,0.4)]"><Ticket className="w-5 h-5 text-white" /><span className="font-syncopate font-black uppercase text-[10px] tracking-widest text-white">{promo.code} • {promo.shortDescription}</span></div>}
-        <div className="relative mt-8"><h1 className="text-5xl sm:text-[8rem] font-syncopate font-black tracking-tighter uppercase leading-[0.85] neon-glow-red">BUDDIES<br /><span className="text-red-500">CAFE</span></h1><div className="mt-4 inline-flex items-center gap-2 glass px-4 py-2 rounded-full border-white/5 opacity-60"><Users className="w-3 h-3 text-red-500" /><span className="text-[9px] font-syncopate font-black uppercase tracking-widest">{visitors} BUDDIES ONLINE</span></div></div>
+        <div className="relative mt-2"><h1 className="text-4xl sm:text-7xl font-syncopate font-black tracking-tighter uppercase leading-[0.9] neon-glow-red">BUDDY'S<br /><span className="text-red-500">HANGOUT CAFE</span></h1><div className="mt-3 inline-flex items-center gap-2 glass px-4 py-2 rounded-full border-white/5 opacity-60"><Users className="w-3 h-3 text-red-500" /><span className="text-[8px] font-syncopate font-black uppercase tracking-widest">{visitors} BUDDY'S HANGOUT CAFE ONLINE</span></div></div>
         <p className="max-w-xl text-gray-400 text-base sm:text-xl font-light">Experience real-time flavors and high-fidelity vibes globally.</p>
-        <div className="flex flex-col sm:flex-row gap-5 w-full max-w-md"><button onClick={() => setView(View.MENU)} className="w-full py-5 bg-white text-black font-syncopate font-black rounded-2xl flex items-center justify-center gap-3 hover:scale-105 transition-all shadow-xl shadow-white/5"><LayoutGrid className="w-4 h-4" /> BROWSE MENU</button><button onClick={() => setView(View.HISTORY)} className="w-full py-5 glass text-red-500 border-red-500/20 font-syncopate font-black rounded-2xl flex items-center justify-center gap-3 hover:scale-105 transition-all"><History className="w-4 h-4" /> RECENT ORDERS</button></div>
+        <div className="flex flex-col sm:flex-row gap-5 w-full max-w-md"><button onClick={() => setView(View.MENU)} className="w-full py-5 bg-white text-black font-syncopate font-black rounded-2xl flex items-center justify-center gap-3 hover:bg-blue-400 hover:text-white hover:scale-105 transition-all duration-300 shadow-xl shadow-white/5"><LayoutGrid className="w-4 h-4" /> BROWSE MENU</button><button onClick={() => setView(View.HISTORY)} className="w-full py-5 glass text-red-500 border-red-500/20 font-syncopate font-black rounded-2xl flex items-center justify-center gap-3 hover:bg-blue-400 hover:text-white hover:border-blue-400/20 hover:scale-105 transition-all duration-300"><History className="w-4 h-4" /> RECENT ORDERS</button></div>
       </div>
-      <section className="space-y-8 animate-in slide-in-from-bottom-5">
+      <section className="space-y-8 animate-in slide-in-from-bottom-5 scroll-fade" data-scroll-fade="true">
         <div className="flex items-center gap-3"><Star className="w-6 h-6 text-red-500 fill-red-500" /><h2 className="text-2xl font-syncopate font-black uppercase tracking-widest">TODAY'S SPECIAL</h2></div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {specials.map((item: MenuItem) => (
@@ -788,7 +1149,40 @@ function HomeView({ setView, promo, menu, events, onRegister, onAdd, onTriggerTo
           ))}
         </div>
       </section>
-      <section className="space-y-8"><div className="flex items-center gap-3"><Music className="w-6 h-6 text-red-500" /><h2 className="text-2xl font-syncopate font-black uppercase tracking-widest">EVENTS SCHEDULE</h2></div><div className="grid grid-cols-1 lg:grid-cols-3 gap-6">{events.map((ev: CafeEvent) => <div key={ev.id} className="glass p-8 rounded-[3rem] border-red-500/10 space-y-6 group hover:bg-white/5 transition-all"><div className="flex justify-between items-start"><div className="p-3 bg-red-600/10 rounded-xl group-hover:bg-red-600 group-hover:text-white transition-all"><Calendar className="w-6 h-6" /></div><div className="text-right"><p className="text-[10px] font-syncopate font-black text-red-500 uppercase">{ev.date}</p><p className="text-[10px] text-gray-500 font-bold uppercase">{ev.price || 'Free'}</p></div></div><h4 className="text-xl font-syncopate font-black uppercase tracking-tighter">{ev.title}</h4><button onClick={() => onRegister(ev)} className="w-full py-4 border border-red-500/20 rounded-2xl flex items-center justify-center gap-3 font-syncopate font-black uppercase text-[9px] hover:bg-red-600 transition-all active:scale-95"><UserPlus className="w-4 h-4" /> REGISTER ATTENDANCE</button></div>)}</div></section>
+      <section className="space-y-8 scroll-fade" data-scroll-fade="true"><div className="flex items-center gap-3"><Music className="w-6 h-6 text-red-500" /><h2 className="text-2xl font-syncopate font-black uppercase tracking-widest">EVENTS SCHEDULE</h2></div><div className="grid grid-cols-1 lg:grid-cols-3 gap-6">{events.map((ev: CafeEvent) => <div key={ev.id} className="glass p-8 rounded-[3rem] border-red-500/10 space-y-6 group hover:bg-white/5 transition-all"><div className="flex justify-between items-start"><div className="p-3 bg-red-600/10 rounded-xl group-hover:bg-red-600 group-hover:text-white transition-all"><Calendar className="w-6 h-6" /></div><div className="text-right"><p className="text-[10px] font-syncopate font-black text-red-500 uppercase">{ev.date}</p><p className="text-[10px] text-gray-500 font-bold uppercase">{ev.price || 'Free'}</p></div></div><h4 className="text-xl font-syncopate font-black uppercase tracking-tighter">{ev.title}</h4><button onClick={() => onRegister(ev)} className="w-full py-4 border border-red-500/20 rounded-2xl flex items-center justify-center gap-3 font-syncopate font-black uppercase text-[9px] hover:bg-red-600 transition-all active:scale-95"><UserPlus className="w-4 h-4" /> REGISTER ATTENDANCE</button></div>)}</div></section>
+      <section className="space-y-8 animate-in slide-in-from-bottom-5 scroll-fade" data-scroll-fade="true">
+        <div className="flex items-center gap-3">
+          <MapPin className="w-6 h-6 text-red-500" />
+          <h2 className="text-2xl font-syncopate font-black uppercase tracking-widest">FIND US</h2>
+        </div>
+        <div className="glass p-8 rounded-[3rem] border-red-500/10 space-y-6">
+          <div className="text-center">
+            <h3 className="text-xl font-syncopate font-black text-red-500 uppercase mb-2">Getting to Buddy's Hangout Cafe</h3>
+            <p className="text-gray-400 text-sm mb-4">13 Jayappa, Yelahanka, near Reva Circle, Reddy Layout, Kattigenahalli, Bengaluru, Sathanur, Karnataka 560064</p>
+            <button 
+              onClick={() => {
+                // Open Google Maps with directions to the cafe
+                const cafeAddress = encodeURIComponent('13 Jayappa, Yelahanka, near Reva Circle, Reddy Layout, Kattigenahalli, Bengaluru, Sathanur, Karnataka 560064');
+                const cafeUrl = 'https://www.google.com/maps/search/?api=1&query=' + cafeAddress;
+                window.open(cafeUrl, '_blank');
+              }}
+              className="w-full py-4 bg-red-600 text-white font-syncopate font-black rounded-2xl uppercase tracking-widest text-[10px] hover:bg-red-700 transition-all active:scale-95"
+            >
+              OPEN IN MAPS
+            </button>
+            <div className="mt-4 pt-4 border-t border-white/5">
+              <a 
+                href="https://share.google/u69OXrQAIYiwCn3Zc" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-block py-3 px-6 bg-white/5 text-white font-syncopate font-black rounded-2xl text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all"
+              >
+                VIEW ON GOOGLE
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
       <style>{`
         @keyframes pulse-subtle {
           0%, 100% { opacity: 1; transform: scale(1); }
@@ -815,6 +1209,19 @@ function MenuView({ menu, cart, onAdd, onTriggerTooltip }: any) {
             </div>
           </div>
         ))}
+      </div>
+      <div className="pt-12 border-t border-white/5 mt-12">
+        <div className="text-center space-y-6">
+          <div className="flex justify-center">
+            <div className="w-48 h-48 bg-white rounded-2xl flex items-center justify-center p-2 shadow-xl border-4 border-red-600/10">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://buddycafehangout.vercel.app/menu" className="w-full h-full object-contain" alt="Order from Menu" />
+            </div>
+          </div>
+          <div>
+            <h3 className="text-xl font-syncopate font-black uppercase tracking-widest text-red-500">SCAN & ORDER</h3>
+            <p className="text-[10px] text-gray-500 font-syncopate font-bold uppercase mt-2">Direct access to our menu for seamless ordering</p>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -937,7 +1344,157 @@ function AdminLogin({ password, onLogin }: any) {
   );
 }
 
+function TimerModal({ order, isVisible, onClose }: { order: Order, isVisible: boolean, onClose: () => void }) {
+  const [timeLeft, setTimeLeft] = useState<string>('');
+  
+  // Calculate time left based on estimated time
+  useEffect(() => {
+    if (!order.estimatedTime || !isVisible) return;
+    
+    // Parse estimated time (format like "20 mins", "1 hour")
+    const parseEstimatedTime = (timeStr: string): number => {
+      if (!timeStr) return 0;
+      
+      const timeMatch = timeStr.match(/(\d+)\s*(min|minute|mins|hour|hours)/i);
+      if (!timeMatch) return 0;
+      
+      const [, amount, unit] = timeMatch;
+      const numAmount = parseInt(amount);
+      
+      if (unit.includes('hour')) {
+        return numAmount * 60 * 60 * 1000; // hours to milliseconds
+      } else {
+        return numAmount * 60 * 1000; // minutes to milliseconds
+      }
+    };
+    
+    const totalTime = parseEstimatedTime(order.estimatedTime);
+    if (totalTime <= 0) return;
+    
+    // Calculate start time (subtract elapsed time from total)
+    const startTime = Date.now();
+    
+    const updateTimer = () => {
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, totalTime - elapsed);
+      
+      if (remaining <= 0) {
+        setTimeLeft('00:00');
+        return;
+      }
+      
+      const minutes = Math.floor(remaining / 60000);
+      const seconds = Math.floor((remaining % 60000) / 1000);
+      setTimeLeft(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+    };
+    
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    
+    return () => clearInterval(interval);
+  }, [order.estimatedTime, isVisible]);
+  
+  if (!isVisible) return null;
+  
+  return (
+    <div className="fixed bottom-4 right-4 z-[100] w-80 glass border border-red-500/20 rounded-2xl p-6 shadow-2xl shadow-red-500/10">
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h3 className="text-lg font-syncopate font-black text-red-500 uppercase">ORDER TIMER</h3>
+          <p className="text-[10px] font-syncopate font-black uppercase opacity-60">{order.id}</p>
+        </div>
+        <button 
+          onClick={onClose}
+          className="p-1 hover:bg-white/10 rounded-full transition-all"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+      
+      <div className="space-y-3">
+        <div className="text-center py-4">
+          <div className="text-4xl font-syncopate font-black text-white mb-2">{timeLeft}</div>
+          <p className="text-[10px] text-gray-400 font-syncopate font-black uppercase">TIME REMAINING</p>
+        </div>
+        
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-400 font-syncopate uppercase">Status:</span>
+            <span className="font-syncopate font-black text-red-500 uppercase">{order.status}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-400 font-syncopate uppercase">Table:</span>
+            <span className="font-syncopate font-black">{order.tableNumber}</span>
+          </div>
+          
+          {order.estimatedTime && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-400 font-syncopate uppercase">Est. Time:</span>
+              <span className="font-syncopate font-black">{order.estimatedTime}</span>
+            </div>
+          )}
+        </div>
+      </div>
+      
+      <div className="mt-4 pt-4 border-t border-white/10">
+        <p className="text-[9px] text-center text-gray-500 font-syncopate font-black uppercase">DRAG TO REPOSITION • MINIMIZE TO BACKGROUND</p>
+      </div>
+    </div>
+  );
+}
+
 function AdminDashboard({ orders, setOrders, menu, setMenu, events, setEvents, registrations, setRegistrations, settings, setSettings, onLogout, timers, setTimers }: any) {
+  // Function to sync data to server
+  const syncDataToServer = useCallback((dataType: string, data: any) => {
+    try {
+      switch(dataType) {
+        case 'orders':
+          localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(data));
+          break;
+        case 'menu':
+          localStorage.setItem(STORAGE_KEYS.MENU, JSON.stringify(data));
+          break;
+        case 'events':
+          localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(data));
+          break;
+        case 'registrations':
+          localStorage.setItem(STORAGE_KEYS.REGISTRATIONS, JSON.stringify(data));
+          break;
+        case 'settings':
+          localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(data));
+          break;
+      }
+      console.log(`${dataType} synced to server`);
+    } catch (error) {
+      console.error(`Error syncing ${dataType} to server:`, error);
+    }
+  }, []);
+  // Fetch fresh data from server for admin dashboard
+  const fetchDataFromServer = useCallback(async () => {
+    try {
+      // In a real implementation, this would fetch from an actual backend API
+      // For now, we'll simulate server data by getting from localStorage
+      const serverOrders = getStored(STORAGE_KEYS.ORDERS, []);
+      const serverMenu = getStored(STORAGE_KEYS.MENU, INITIAL_MENU);
+      const serverEvents = getStored(STORAGE_KEYS.EVENTS, INITIAL_EVENTS);
+      const serverRegs = getStored(STORAGE_KEYS.REGISTRATIONS, []);
+      
+      // Update local state with server data
+      setOrders(serverOrders);
+      setMenu(serverMenu);
+      setEvents(serverEvents);
+      setRegistrations(serverRegs);
+    } catch (error) {
+      console.error('Error fetching server data:', error);
+    }
+  }, [setOrders, setMenu, setEvents, setRegistrations]);
+  
+  // Refresh data periodically
+  useEffect(() => {
+    fetchDataFromServer();
+    const interval = setInterval(fetchDataFromServer, 5000); // Refresh every 5 seconds
+    return () => clearInterval(interval);
+  }, [fetchDataFromServer]);
   const [tab, setTab] = useState<'orders'|'menu'|'events'|'settings'|'attendance'>('orders');
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
@@ -974,6 +1531,14 @@ function AdminDashboard({ orders, setOrders, menu, setMenu, events, setEvents, r
                       // Update order status
                       const updatedOrders = orders.map((x: any) => x.id === o.id ? {...x, status: s} : x);
                       setOrders(updatedOrders);
+                      
+                      // Sync to server
+                      try {
+                        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updatedOrders));
+                        console.log('Orders synced to server');
+                      } catch (error) {
+                        console.error('Error syncing orders to server:', error);
+                      }
                       
                       // Set timer if status is changed to PREPARING
                       if (s === OrderStatus.PREPARING) {
@@ -1013,7 +1578,18 @@ function AdminDashboard({ orders, setOrders, menu, setMenu, events, setEvents, r
                 </div>
                 <div className="flex items-center gap-3">
                    <Clock className="w-4 h-4 text-red-500" />
-                   <input type="text" placeholder="Estimated Time" value={o.estimatedTime || ''} onChange={(e) => setOrders(orders.map((x: any) => x.id === o.id ? {...x, estimatedTime: e.target.value} : x))} className="bg-white/5 border border-white/10 p-3 rounded-xl text-[10px] font-syncopate uppercase focus:outline-none focus:border-red-500 transition-all" />
+                   <input type="text" placeholder="Estimated Time" value={o.estimatedTime || ''} onChange={(e) => {
+                     const updatedOrders = orders.map((x: any) => x.id === o.id ? {...x, estimatedTime: e.target.value} : x);
+                     setOrders(updatedOrders);
+                                     
+                     // Sync to server
+                     try {
+                       localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updatedOrders));
+                       console.log('Orders synced to server');
+                     } catch (error) {
+                       console.error('Error syncing orders to server:', error);
+                     }
+                   }} className="bg-white/5 border border-white/10 p-3 rounded-xl text-[10px] font-syncopate uppercase focus:outline-none focus:border-red-500 transition-all" />
                 </div>
               </div>
             </div>
@@ -1035,7 +1611,9 @@ function AdminDashboard({ orders, setOrders, menu, setMenu, events, setEvents, r
                   available: true,
                   isSpecial: false
                 };
-                setMenu([...menu, newItem]);
+                const updatedMenu = [...menu, newItem];
+                setMenu(updatedMenu);
+                syncDataToServer('menu', updatedMenu);
                 setEditingItem(newItem);
               }}
               className="px-4 py-2 bg-red-600 rounded-xl text-[10px] font-syncopate font-black uppercase"
@@ -1066,6 +1644,49 @@ function AdminDashboard({ orders, setOrders, menu, setMenu, events, setEvents, r
                       className="w-full bg-white/5 border border-white/10 p-2 rounded-xl text-sm focus:outline-none focus:border-red-500"
                       placeholder="Price"
                     />
+                    <input 
+                      type="text" 
+                      value={editingItem.image}
+                      onChange={(e) => setEditingItem({...editingItem, image: e.target.value})}
+                      className="w-full bg-white/5 border border-white/10 p-2 rounded-xl text-sm focus:outline-none focus:border-red-500"
+                      placeholder="Image URL"
+                    />
+                    <div className="relative">
+                      <label className="block w-full py-3 bg-white/5 border border-white/10 rounded-xl text-center cursor-pointer hover:bg-white/10 transition-all group">
+                        <Upload className="w-5 h-5 mx-auto mb-2 text-red-500 group-hover:scale-110 transition-all" />
+                        <span className="text-[10px] font-syncopate font-black uppercase">UPLOAD IMAGE</span>
+                        <input 
+                          type="file" 
+                          className="hidden" 
+                          accept="image/*" 
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                setEditingItem({...editingItem, image: reader.result as string});
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }} 
+                        />
+                      </label>
+                      {editingItem.image && (
+                        <div className="mt-3 relative">
+                          <img 
+                            src={editingItem.image} 
+                            alt="Preview" 
+                            className="w-full h-32 object-cover rounded-xl border border-white/10"
+                          />
+                          <button 
+                            onClick={() => setEditingItem({...editingItem, image: ''})}
+                            className="absolute top-2 right-2 p-1 bg-red-600/80 text-white rounded-full hover:bg-red-600 transition-all"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                     <select 
                       value={editingItem.category}
                       onChange={(e) => setEditingItem({...editingItem, category: e.target.value as any})}
@@ -1098,7 +1719,9 @@ function AdminDashboard({ orders, setOrders, menu, setMenu, events, setEvents, r
                     <div className="flex gap-2 pt-2">
                       <button 
                         onClick={() => {
-                          setMenu(menu.map(m => m.id === editingItem.id ? editingItem : m));
+                          const updatedMenu = menu.map(m => m.id === editingItem.id ? editingItem : m);
+                          setMenu(updatedMenu);
+                          syncDataToServer('menu', updatedMenu);
                           setEditingItem(null);
                         }}
                         className="flex-1 py-2 bg-green-600 rounded-xl text-[9px] font-syncopate font-black uppercase"
@@ -1126,7 +1749,11 @@ function AdminDashboard({ orders, setOrders, menu, setMenu, events, setEvents, r
                         EDIT
                       </button>
                       <button 
-                        onClick={() => setMenu(menu.filter(m => m.id !== item.id))}
+                        onClick={() => {
+                          const updatedMenu = menu.filter(m => m.id !== item.id);
+                          setMenu(updatedMenu);
+                          syncDataToServer('menu', updatedMenu);
+                        }}
                         className="flex-1 py-2 bg-red-600/20 text-red-500 rounded-xl text-[9px] font-syncopate font-black uppercase hover:bg-red-600 hover:text-white transition-all"
                       >
                         DELETE
@@ -1149,7 +1776,11 @@ function AdminDashboard({ orders, setOrders, menu, setMenu, events, setEvents, r
               <label className="w-full py-6 border-2 border-dashed border-red-500/30 rounded-[2.5rem] flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-red-500/10 transition-all group">
                 <Upload className="w-8 h-8 text-red-500 group-hover:scale-110 transition-all" />
                 <span className="text-[10px] font-syncopate font-black uppercase tracking-widest">SYNC NEW QR ASSET</span>
-                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, (url) => setSettings({...settings, qrCodeUrl: url}))} />
+                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, (url) => {
+                  const updatedSettings = {...settings, qrCodeUrl: url};
+                  setSettings(updatedSettings);
+                  syncDataToServer('settings', updatedSettings);
+                })} />
               </label>
             </div>
           </div>
@@ -1171,7 +1802,9 @@ function AdminDashboard({ orders, setOrders, menu, setMenu, events, setEvents, r
                   description: 'Event description',
                   price: 'Free'
                 };
-                setEvents([...events, newEvent]);
+                const updatedEvents = [...events, newEvent];
+                setEvents(updatedEvents);
+                syncDataToServer('events', updatedEvents);
               }}
               className="px-4 py-2 bg-red-600 rounded-xl text-[10px] font-syncopate font-black uppercase"
             >
@@ -1185,31 +1818,51 @@ function AdminDashboard({ orders, setOrders, menu, setMenu, events, setEvents, r
                 <input 
                   type="text" 
                   value={event.title}
-                  onChange={(e) => setEvents(events.map(ev => ev.id === event.id ? {...ev, title: e.target.value} : ev))}
+                  onChange={(e) => {
+                    const updatedEvents = events.map(ev => ev.id === event.id ? {...ev, title: e.target.value} : ev);
+                    setEvents(updatedEvents);
+                    syncDataToServer('events', updatedEvents);
+                  }}
                   className="w-full bg-white/5 border border-white/10 p-3 rounded-xl focus:outline-none focus:border-red-500"
                   placeholder="Event Title"
                 />
                 <input 
                   type="date" 
                   value={event.date}
-                  onChange={(e) => setEvents(events.map(ev => ev.id === event.id ? {...ev, date: e.target.value} : ev))}
+                  onChange={(e) => {
+                    const updatedEvents = events.map(ev => ev.id === event.id ? {...ev, date: e.target.value} : ev);
+                    setEvents(updatedEvents);
+                    syncDataToServer('events', updatedEvents);
+                  }}
                   className="w-full bg-white/5 border border-white/10 p-3 rounded-xl focus:outline-none focus:border-red-500"
                 />
                 <textarea 
                   value={event.description}
-                  onChange={(e) => setEvents(events.map(ev => ev.id === event.id ? {...ev, description: e.target.value} : ev))}
+                  onChange={(e) => {
+                    const updatedEvents = events.map(ev => ev.id === event.id ? {...ev, description: e.target.value} : ev);
+                    setEvents(updatedEvents);
+                    syncDataToServer('events', updatedEvents);
+                  }}
                   className="w-full bg-white/5 border border-white/10 p-3 rounded-xl focus:outline-none focus:border-red-500 min-h-[100px]"
                   placeholder="Event Description"
                 />
                 <input 
                   type="text" 
                   value={event.price || ''}
-                  onChange={(e) => setEvents(events.map(ev => ev.id === event.id ? {...ev, price: e.target.value} : ev))}
+                  onChange={(e) => {
+                    const updatedEvents = events.map(ev => ev.id === event.id ? {...ev, price: e.target.value} : ev);
+                    setEvents(updatedEvents);
+                    syncDataToServer('events', updatedEvents);
+                  }}
                   className="w-full bg-white/5 border border-white/10 p-3 rounded-xl focus:outline-none focus:border-red-500"
                   placeholder="Price (optional)"
                 />
                 <button 
-                  onClick={() => setEvents(events.filter(ev => ev.id !== event.id))}
+                  onClick={() => {
+                    const updatedEvents = events.filter(ev => ev.id !== event.id);
+                    setEvents(updatedEvents);
+                    syncDataToServer('events', updatedEvents);
+                  }}
                   className="w-full py-3 bg-red-600/20 text-red-500 rounded-xl text-[10px] font-syncopate font-black uppercase hover:bg-red-600 hover:text-white transition-all"
                 >
                   DELETE EVENT

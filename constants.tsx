@@ -4,13 +4,31 @@ import { MenuItem, Book, Founder } from './types';
 
 // Fix: Added missing 'available' property to each MenuItem as required by the interface definition
 export const INITIAL_MENU: MenuItem[] = [
-  { id: '1', name: 'Paneer Tikka Sliders', price: '₹349', category: 'Snacks', image: 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?auto=format&fit=crop&q=80&w=400', available: true },
-  { id: '2', name: 'Masala Truffle Fries', price: '₹229', category: 'Snacks', image: 'https://images.unsplash.com/photo-1573082818143-2410bc47fe2e?auto=format&fit=crop&q=80&w=400', available: true },
-  { id: '3', name: 'Fresh Watermelon Chill', price: '₹189', category: 'Beverages', image: 'https://images.unsplash.com/photo-1554260533-33e721013a7c?auto=format&fit=crop&q=80&w=400', available: true },
-  { id: '4', name: 'Kesar Pista Shake', price: '₹249', category: 'Beverages', image: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&q=80&w=400', available: true },
-  { id: '5', name: 'Blueberry Cheesecake', price: '₹299', category: 'Desserts', image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&q=80&w=400', available: true },
-  { id: '6', name: 'Zesty Nimbu Masala', price: '₹129', category: 'Beverages', image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&q=80&w=400', available: true },
-  { id: '7', name: 'Vada Pav Sliders', price: '₹199', category: 'Snacks', image: 'https://images.unsplash.com/photo-1606491956689-2ea866880c84?auto=format&fit=crop&q=80&w=400', available: true },
+  // Toasts & Sandwiches - categorized as Snacks
+  { id: '1', name: 'Bread Jam', price: '₹40', category: 'Snacks', image: 'https://images.unsplash.com/photo-1603569283843-6aba9f46a010?auto=format&fit=crop&q=80&w=400', available: true },
+  { id: '2', name: 'Bread Toast', price: '₹30', category: 'Snacks', image: 'https://images.unsplash.com/photo-1589370885509-2f04a162be2e?auto=format&fit=crop&q=80&w=400', available: true },
+  { id: '3', name: 'Bread Butter', price: '₹40', category: 'Snacks', image: 'https://images.unsplash.com/photo-1506354666786-960f0477b6cc?auto=format&fit=crop&q=80&w=400', available: true },
+  { id: '4', name: 'Bread with Peanut Butter', price: '₹40', category: 'Snacks', image: 'https://images.unsplash.com/photo-1622319080336-64014080dae1?auto=format&fit=crop&q=80&w=400', available: true },
+  { id: '5', name: 'Bread with Nutella', price: '₹50', category: 'Snacks', image: 'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?auto=format&fit=crop&q=80&w=400', available: true },
+  { id: '6', name: 'Garlic Bread', price: '₹40', category: 'Snacks', image: 'https://images.unsplash.com/photo-1589386350250-8b7e66b3d7e4?auto=format&fit=crop&q=80&w=400', available: true },
+  { id: '7', name: 'Garlic Bread with Cheese', price: '₹60', category: 'Snacks', image: 'https://images.unsplash.com/photo-1622319080336-64014080dae1?auto=format&fit=crop&q=80&w=400', available: true },
+  { id: '8', name: 'Bun Maska', price: '₹30', category: 'Snacks', image: 'https://images.unsplash.com/photo-1591946614722-2a5c7b5a17fe?auto=format&fit=crop&q=80&w=400', available: true },
+  
+  // Healthy Salads - categorized as Snacks
+  { id: '9', name: 'Veg Salad', price: '₹30', category: 'Snacks', image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=400', available: true },
+  
+  // Add-Ons for Salads - categorized as Snacks
+  { id: '10', name: 'Chickpea (Sundal)', price: '₹30', category: 'Snacks', image: 'https://images.unsplash.com/photo-1566599862423-09460587e3d5?auto=format&fit=crop&q=80&w=400', available: true },
+  { id: '11', name: 'Cucumber', price: '₹30', category: 'Snacks', image: 'https://images.unsplash.com/photo-1542818212-9899bafcb9db?auto=format&fit=crop&q=80&w=400', available: true },
+  { id: '12', name: 'Sweet Corn', price: '₹30', category: 'Snacks', image: 'https://images.unsplash.com/photo-1546803133-39701371ce41?auto=format&fit=crop&q=80&w=400', available: true },
+  { id: '13', name: 'Green Gram', price: '₹30', category: 'Snacks', image: 'https://images.unsplash.com/photo-1603105037880-8802c0a1b3e9?auto=format&fit=crop&q=80&w=400', available: true },
+  
+  // Fruit Treats - categorized as Desserts
+  { id: '14', name: 'Fruit Salad', price: '₹60', category: 'Desserts', image: 'https://images.unsplash.com/photo-1566599862423-09460587e3d5?auto=format&fit=crop&q=80&w=400', available: true },
+  
+  // Add-Ons for Fruit Treats - categorized as Desserts
+  { id: '15', name: 'Ice Cream', price: '₹20', category: 'Desserts', image: 'https://images.unsplash.com/photo-1570293263471-3419e8f0ba0e?auto=format&fit=crop&q=80&w=400', available: true },
+  { id: '16', name: 'Jelly', price: '₹10', category: 'Desserts', image: 'https://images.unsplash.com/photo-1566599862423-09460587e3d5?auto=format&fit=crop&q=80&w=400', available: true },
 ];
 
 export const INITIAL_FOUNDERS: Founder[] = [
@@ -53,7 +71,7 @@ export const INITIAL_BOOKS: Book[] = [
   },
 ];
 
-export const DEFAULT_QR = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://buddiescafe.space/menu';
+export const DEFAULT_QR = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://buddycafehangout.vercel.app/menu';
 
 export const SPONSOR_LOGO = (
   <div className="flex items-center space-x-3 opacity-90 hover:opacity-100 transition-opacity">
