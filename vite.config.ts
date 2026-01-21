@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => {
         }
       },
       // Base configuration for Vercel deployment
-      base: '/',
+      base: './',
       build: {
         outDir: 'dist',
         assetsDir: 'assets',
