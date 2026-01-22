@@ -333,6 +333,74 @@ const ThreeBackground = ({ color }: { color: string }) => {
     };
     window.addEventListener('mousemove', handleMouseMove);
 
+    // Raycaster for detecting clicks on food icons
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    
+    // Track clicked state to prevent multiple sounds
+    let clickedIcons: Set<THREE.Object3D> = new Set();
+    
+    const handleClick = (event: MouseEvent) => {
+      // Calculate mouse position in normalized device coordinates
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      
+      // Update the picking ray with the camera and mouse position
+      raycaster.setFromCamera(mouse, camera);
+      
+      // Calculate objects intersecting the picking ray
+      const intersects = raycaster.intersectObjects(iconsGroup.children, true);
+      
+      if (intersects.length > 0) {
+        const clickedObject = intersects[0].object;
+        
+        // Find the parent icon group
+        let iconParent = clickedObject;
+        while (iconParent && !(iconParent.userData && iconParent.userData.originalPosition)) {
+          iconParent = iconParent.parent;
+        }
+        
+        if (iconParent && !clickedIcons.has(iconParent)) {
+          // Mark as clicked to prevent multiple sounds
+          clickedIcons.add(iconParent);
+          
+          // Play juice sound
+          (window as any).playJuiceSound?.();
+          
+          // Visual feedback - scale up and back down
+          const originalScale = iconParent.scale.x;
+          iconParent.scale.setScalar(originalScale * 1.5);
+          
+          setTimeout(() => {
+            iconParent.scale.setScalar(originalScale);
+            clickedIcons.delete(iconParent);
+          }, 300);
+          
+          // Add a brief color change effect
+          if (iconParent instanceof THREE.Mesh) {
+            const originalColor = (iconParent.material as THREE.MeshBasicMaterial).color.clone();
+            (iconParent.material as THREE.MeshBasicMaterial).color.set(0x00ff00); // Green flash
+            setTimeout(() => {
+              (iconParent.material as THREE.MeshBasicMaterial).color.copy(originalColor);
+            }, 150);
+          } else if (iconParent instanceof THREE.Group) {
+            iconParent.traverse(child => {
+              if (child instanceof THREE.Mesh) {
+                const originalColor = (child.material as THREE.MeshBasicMaterial).color.clone();
+                (child.material as THREE.MeshBasicMaterial).color.set(0x00ff00); // Green flash
+                setTimeout(() => {
+                  (child.material as THREE.MeshBasicMaterial).color.copy(originalColor);
+                }, 150);
+              }
+            });
+          }
+        }
+      }
+    };
+    
+    // Add click event listener
+    window.addEventListener('click', handleClick);
+    
     const animate = () => {
       requestAnimationFrame(animate);
       const time = Date.now() * 0.001;
@@ -415,9 +483,49 @@ const ThreeBackground = ({ color }: { color: string }) => {
     };
     window.addEventListener('resize', handleResize);
 
+    // Make the juice sound function available globally
+    (window as any).playJuiceSound = () => {
+      // Create audio context and generate a juice pouring sound
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      // Create noise for the pouring sound
+      const bufferSize = 2 * audioContext.sampleRate;
+      const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      
+      for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1; // Generate noise
+      }
+      
+      const noise = audioContext.createBufferSource();
+      noise.buffer = noiseBuffer;
+      
+      // Apply filtering to make it sound more like pouring
+      const filter = audioContext.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = 600;
+      filter.Q.value = 1.0;
+      
+      // Add gain envelope for attack and release
+      const gainNode = audioContext.createGain();
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.5, audioContext.currentTime + 0.1);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.0);
+      
+      noise.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      noise.start();
+      noise.stop(audioContext.currentTime + 1.0);
+    };
+    
     return () => { 
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('click', handleClick);
+      // Clean up the global function
+      delete (window as any).playJuiceSound;
     };
   }, []);
 
@@ -971,8 +1079,50 @@ export default function App() {
     }
   };
 
+  // Function to play juice pouring sound
+  const playJuiceSound = () => {
+    // Create audio context and generate a juice pouring sound
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    
+    // Create noise for the pouring sound
+    const bufferSize = 2 * audioContext.sampleRate;
+    const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    
+    for (let i = 0; i < bufferSize; i++) {
+      output[i] = Math.random() * 2 - 1; // Generate noise
+    }
+    
+    const noise = audioContext.createBufferSource();
+    noise.buffer = noiseBuffer;
+    
+    // Apply filtering to make it sound more like pouring
+    const filter = audioContext.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 600;
+    filter.Q.value = 1.0;
+    
+    // Add gain envelope for attack and release
+    const gainNode = audioContext.createGain();
+    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.5, audioContext.currentTime + 0.1);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.0);
+    
+    noise.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    noise.start();
+    noise.stop(audioContext.currentTime + 1.0);
+  };
+  
+  // Function to handle food icon clicks
+  const handleFoodIconClick = () => {
+    playJuiceSound();
+  };
+  
   return (
-    <div className="min-h-screen text-white relative transition-colors duration-700 bg-black overflow-hidden">
+    <div className="min-h-screen text-white relative transition-colors duration-700 bg-black/80 overflow-hidden">
       <ThreeBackground color={vibe} />
       {tooltip && <Tooltip message={tooltip} />}
       
